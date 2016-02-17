@@ -1,0 +1,34 @@
+<%FLAGS>
+  inherit => '/json.mc'
+</%FLAGS>
+
+<%ARGS>
+  $app
+  $host
+  $time => undef
+</%ARGS>
+<%INIT>
+  use DBI;
+
+  my $db = $ENV{DOCUMENT_ROOT}.$m->current_comp()->dir_path().'/../db.sqlite';
+  my $dbh = DBI->connect('dbi:SQLite:dbname='.$db, '', '') || return { error => __LINE__ };
+
+  my $q = qq|INSERT INTO `records` (`host`, `app`, `time`, `received`, `key`, `value`) VALUES |;
+
+  my @d;
+  foreach my $key (sort(keys(%ARGS)))
+  {
+    next if($key =~ /^(app|host|time)$/);
+    push(@d, sprintf('(%s, %s, %d, %d, %s, %d)', $dbh->quote($host), $dbh->quote($app), $time || time(), time(), $dbh->quote($key), $ARGS{$key}));
+  }
+
+  if(!@d)
+  {
+    push(@d, sprintf('(%s, %s, %d, %d, NULL, NULL)', $dbh->quote($host), $dbh->quote($app), $time || time(), time()));
+  }
+
+  my $sth = $dbh->prepare($q.join(',', @d)) || return { error => __LINE__ };
+  $sth->execute() || return { error => __LINE__, msg => $dbh->errstr() };
+
+  return { error => 0 };
+</%INIT>

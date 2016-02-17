@@ -1,0 +1,12 @@
+#
+# - review file and adjust settings
+# - rename this file to "config"
+# - format is key<tab>value
+# - no empty lines, comments start with ; or #
+#
+#
+# url to a whatsup server/service
+service	https://a_whatsup_server/whatsup/
+#
+# optional, hostname will be used
+host	this_computer_name
