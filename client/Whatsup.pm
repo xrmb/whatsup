@@ -19,14 +19,14 @@ sub new
 
   my $cfg;
   my $fh;
-  if(open($fh, '<', __FILE__.'/../config'))
+  if(open($fh, '<', __FILE__.'/../config.dat'))
   {
     $cfg = { split(/[\t\n\r]+/, join('', grep { /^[^;#]/ } <$fh>)) };
     close($fh);
   }
   else
   {
-    warn('cant open config');
+    warn('cant open config.dat');
   }
 
   my $self = {};
@@ -69,7 +69,9 @@ sub record
     warn(sprintf("service: %d %s %s\n", $res->code(), $uri, $res->content()));
     if(!$self->{noqueue})
     {
-      my $fh = File::Temp->new(DIR => __FILE__.'/../queue', TEMPLATE => $args{app}.'_XXXXXX', SUFFIX => '.json', UNLINK => 0);
+      my $dir = __FILE__.'/../queue';
+      unless(-d $dir) { mkdir($dir) || warn('cant make queue dir') && return __LINE__; }
+      my $fh = File::Temp->new(DIR => $dir, TEMPLATE => $args{app}.'_XXXXXX', SUFFIX => '.json', UNLINK => 0);
       print($fh $json);
     }
     return __LINE__;
