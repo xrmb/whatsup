@@ -19,7 +19,7 @@
   foreach my $key (sort(keys(%ARGS)))
   {
     next if($key =~ /^(app|host|time)$/);
-    push(@d, sprintf('(%s, %s, %d, %d, %s, %d)', $dbh->quote($host), $dbh->quote($app), $time || time(), time(), $dbh->quote($key), $ARGS{$key}));
+    push(@d, sprintf('(%s, %s, %d, %d, %s, %d)', $dbh->quote($host), $dbh->quote($app), $time || time(), time(), $dbh->quote($key), int($ARGS{$key})));
   }
 
   if(!@d)
