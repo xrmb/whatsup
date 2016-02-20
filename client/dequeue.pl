@@ -1,17 +1,23 @@
 #!perl
 
 use JSON;
+use Cwd;
 
 use Whatsup;
 
 use strict;
 
-$|=1;
+
+if($ARGV[0] eq 'create') { exit system(qq|schtasks /create /tn "$ARGV[1]\\whatsup\\dequeue" /sc minute /mo 300 /tr "$^X |.Cwd::abs_path(__FILE__).qq|"|); }
+if($ARGV[0] eq 'delete') { exit system(qq|schtasks /delete /tn "$ARGV[1]\\whatsup\\dequeue"|); }
+
+
+$| = 1;
 
 
 my $dh;
-opendir($dh, 'queue') || die;
-my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { "queue/$_" } grep { /\.json$/ } readdir($dh);
+opendir($dh, __FILE__.'/../queue') || die;
+my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { __FILE__."/../queue/$_" } grep { /\.json$/ } readdir($dh);
 closedir($dh);
 
 
@@ -36,5 +42,6 @@ foreach my $r (@r)
   }
 
   sleep(1);
-  #exit;
 }
+
+exit 0;
