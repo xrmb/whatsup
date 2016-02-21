@@ -67,7 +67,7 @@ for my $sample (1..$samples)
 $whatsup{used_cpu} = int($whatsup{used_cpu});
 
 printf("\nuptime:\t\t%d days %d hours %d minutes %d seconds\n", $whatsup{uptime}/(24*60*60), $whatsup{uptime}/(60*60) % 24, $whatsup{uptime}/60 % 60, $whatsup{uptime} % 60);
-printf("used_mem:\t%d\nused_cpu:\t%d\n", $whatsup{used_mem}, $whatsup{used_cpu});
+printf("total_mem:\t%d\nused_mem:\t%d\nused_cpu:\t%d\n", $whatsup{total_mem}, $whatsup{used_mem}, $whatsup{used_cpu});
 printf("\nresult:\t%d\n", Whatsup->record(app => 'perf', %whatsup));
 
 exit 0;
