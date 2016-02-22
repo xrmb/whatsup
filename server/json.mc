@@ -24,9 +24,10 @@
     $json = $m->call_next(%$json);
   }
 
+  $r->content_type('application/json');
   $m->out(encode_json($json));
   if($json->{error})
   {
-    $m->abort($json->{code} ||500);
+    $r->header_out(status => $json->{code} || 500);
   }
 </%INIT>
