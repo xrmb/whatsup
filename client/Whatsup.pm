@@ -65,9 +65,11 @@ sub record
   my $lwp = LWP::UserAgent->new();
   my $res = $lwp->request($req);
 
+  my $content = $res->content();
+
   if($res->code() != 200)
   {
-    warn(sprintf("service: %d %s %s\n", $res->code(), $uri, $res->content()));
+    warn(sprintf("service: %d %s %s\n", $res->code(), $uri, $content));
     if(!$self->{noqueue})
     {
       delete($args{auth});
@@ -78,10 +80,10 @@ sub record
       my $fh = File::Temp->new(DIR => $dir, TEMPLATE => $args{app}.'_XXXXXX', SUFFIX => '.json', UNLINK => 0);
       print($fh $json);
     }
-    return __LINE__;
+    return wantarray ? (__LINE__, $content) : __LINE__;
   }
 
-  return 0;
+  return wantarray ? (0, $content) : 0;
 }
 
 
