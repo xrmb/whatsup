@@ -4,4 +4,6 @@ use strict;
 
 use Whatsup;
 
-Whatsup->record(app => 'test', ping => 1);
+my ($r, $c) = Whatsup->record(app => 'test', ping => 1);
+print("result:\t$r\n");
+print("content:\t$c\n");
