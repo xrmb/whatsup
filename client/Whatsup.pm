@@ -47,7 +47,7 @@ sub record
   my ($self, %args) = @_;
   if(!ref($self)) { $self = __PACKAGE__->new(%args); }
 
-  foreach my $k (qw(host app))
+  foreach my $k (qw(host app auth))
   {
     $args{$k} ||= $self->{$k};
     $args{$k} || warn("no $k") && return __LINE__;
@@ -69,6 +69,9 @@ sub record
     warn(sprintf("service: %d %s %s\n", $res->code(), $uri, $res->content()));
     if(!$self->{noqueue})
     {
+      delete($args{auth});
+      my $json = to_json(\%args);
+
       my $dir = __FILE__.'/../queue';
       unless(-d $dir) { mkdir($dir) || warn('cant make queue dir') && return __LINE__; }
       my $fh = File::Temp->new(DIR => $dir, TEMPLATE => $args{app}.'_XXXXXX', SUFFIX => '.json', UNLINK => 0);

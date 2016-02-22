@@ -1,14 +1,18 @@
 <%FLAGS>
-  inherit => '/json.mc'
+  inherit => '../json.mc'
 </%FLAGS>
 
 <%ARGS>
   $app
   $host
+  $auth => undef
   $time => undef
 </%ARGS>
 <%INIT>
   use DBI;
+
+  $m->comp('../auth.mc', for => "add.$host", auth => $auth) || return { code => 403, error => __LINE__ };
+  
 
   my $db = $ENV{DOCUMENT_ROOT}.$m->current_comp()->dir_path().'/../db.sqlite';
   my $dbh = DBI->connect('dbi:SQLite:dbname='.$db, '', '') || return { error => __LINE__ };
