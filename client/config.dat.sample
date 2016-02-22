@@ -5,8 +5,11 @@
 # - no empty lines, comments start with ; or #
 #
 #
-# url to a whatsup server/service
+# required, url to a whatsup server/service
 service	https://a_whatsup_server/whatsup/
 #
 # optional, hostname will be used
 host	this_computer_name
+#
+# required, auth key to add service
+auth	some_secret_message
