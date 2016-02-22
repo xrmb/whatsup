@@ -33,7 +33,7 @@ sub new
 
   $self->{host} = $args{host} || $cfg->{host} || hostname() || warn('no host');
   $self->{app} = $args{app};
-  $self->{auth} = $args{auth};
+  $self->{auth} = $cfg->{auth} || warn('no auth');
   $self->{service} = $cfg->{service} || warn('no service');
   $self->{noqueue} = $args{noqueue} || 0;
 
