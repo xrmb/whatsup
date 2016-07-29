@@ -17,7 +17,7 @@ sub new
 
   if($inst) { return $inst; }
 
-  my $cfg;
+  my $cfg = {};
   my $fh;
   if(open($fh, '<', __FILE__.'/../config.dat'))
   {
@@ -29,7 +29,7 @@ sub new
     warn('cant open config.dat');
   }
 
-  my $self = {};
+  my $self = $cfg;
 
   $self->{host} = $args{host} || $cfg->{host} || hostname() || warn('no host');
   $self->{app} = $args{app};
