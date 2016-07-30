@@ -36,17 +36,23 @@ foreach my $e (@$data)
   next if($e->{availability} == 0);
   next if($e->{status} !~ /seeding/i);
 
+  ($e->{avail_seeds}, $e->{avail_peers}) = ($e->{status} =~ /\d+ \((\d+)\) \d+ \((\d+)\)/);
+
   printf("%s\n\tout:\t%s\n\tavail:\t%d\n\tpeers:\t%d\n\n", $e->{name}, to_number($e->{out_bytes_total}), $e->{availability}*10000, $e->{peers}*1);
 
   my $name = $e->{name};
   $whatsup{"avail_$name"} = int($e->{availability}*10000);
-  $whatsup{"peers_$name"} = int($e->{peers}*1);
+  $whatsup{"avail_peers_$name"} = int($e->{avail_peers}*1);
+  $whatsup{"avail_seeds_$name"} = int($e->{avail_seeds}*1);
   $whatsup{"out_$name"} = to_number($e->{out_bytes_total});
 
-  #warn JSON->new->pretty(1)->encode($e);
+  warn JSON->new->pretty(1)->encode($e);
 }
 
-$w->record(%whatsup);
+if($ARGV[0] ne 'test')
+{
+  $w->record(%whatsup);
+}
 
 sub to_number
 {
