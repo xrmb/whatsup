@@ -9,30 +9,31 @@
   $time => undef
 </%ARGS>
 <%INIT>
-  use DBI;
-
   $m->comp('../auth.mc', for => "add.$host", auth => $auth) || return { code => 403, error => __LINE__ };
-  
 
-  my $db = $ENV{DOCUMENT_ROOT}.$m->current_comp()->dir_path().'/../db.sqlite';
-  my $dbh = DBI->connect('dbi:SQLite:dbname='.$db, '', '') || return { error => __LINE__ };
+  my $q = qq|INSERT INTO `records` (`host`, `app`, `time`, `received`, `key`, `value`) VALUES (?, ?, ?, ?, ?, ?)|;
+  my ($sth, $err) = $m->comp('../dbq.mc', q => $q, exec => 0);
+  if($err) { $err = { err => 0, msg => 'prepare error' }; }
 
-  my $q = qq|INSERT INTO `records` (`host`, `app`, `time`, `received`, `key`, `value`) VALUES |;
-
-  my @d;
+  my $any = 0;
   foreach my $key (sort(keys(%ARGS)))
   {
-    next if($key =~ /^(app|host|time)$/);
-    push(@d, sprintf('(%s, %s, %d, %d, %s, %d)', $dbh->quote($host), $dbh->quote($app), $time || time(), time(), $dbh->quote($key), int($ARGS{$key})));
+    next if($key =~ /^(app|host|time|auth)$/);
+    if(!$sth->execute($host, $app, $time || time(), time(), $key, int($ARGS{$key})))
+    {
+      warn($sth->errstr());
+    }
+
+    $any++;
   }
 
-  if(!@d)
+  if(!$any)
   {
-    push(@d, sprintf('(%s, %s, %d, %d, NULL, NULL)', $dbh->quote($host), $dbh->quote($app), $time || time(), time()));
+    if(!$sth->execute($host, $app, $time || time(), time(), undef, undef))
+    {
+      warn($sth->errstr());
+    }
   }
-
-  my $sth = $dbh->prepare($q.join(',', @d)) || return { error => __LINE__ };
-  $sth->execute() || return { error => __LINE__, msg => $dbh->errstr() };
 
   return { error => 0 };
 </%INIT>
