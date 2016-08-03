@@ -3,6 +3,7 @@
 use JSON;
 use Cwd;
 
+use lib (__FILE__.'/..');
 use Whatsup;
 
 use strict;

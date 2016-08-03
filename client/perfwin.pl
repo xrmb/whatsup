@@ -5,6 +5,7 @@ use Win32::API;
 use Cwd;
 use Math::Int64;
 
+use lib (__FILE__.'/..');
 use Whatsup;
 
 use strict;
