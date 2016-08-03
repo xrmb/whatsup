@@ -40,6 +40,10 @@ foreach my $e (@$data)
 
   ($e->{avail_seeds}, $e->{avail_peers}) = ($e->{status} =~ /\d+ \((\d+)\) \d+ \((\d+)\)/);
 
+  $req = HTTP::Request->new('GET', join('/', $w->{tixati_url}, 'transfers', $e->{guid}, 'data'));
+  $res = $ua->request($req);
+  die if($res->code() != 200);
+
   my $peers = JSON->new->utf8->decode($res->content());
   $e->{peers} = 0;
   $e->{seeds} = 0;
@@ -57,18 +61,15 @@ foreach my $e (@$data)
     }
   }
 
-  printf("%s\n\tout:\t%s\n\tavail:\t%d\n\tpeers:\t%d\n\tseeds:\t%d\n\n", $e->{name}, to_number($e->{out_bytes_total}), $e->{availability}*10000, $e->{peers}, $e->{seeds});
-
 
   my $name = decode_entities($e->{name});
+  printf("%s\n\tout:\t%s\n\tavail:\t%d\n\tpeers:\t%d\n\tseeds:\t%d\n\n", $name, to_number($e->{out_bytes_total}), $e->{availability}*10000, $e->{peers}, $e->{seeds});
+
+
   $whatsup{"avail_$name"} = int($e->{availability}*10000);
   $whatsup{"peers_$name"} = $e->{peers}*1;
   $whatsup{"seeds_$name"} = $e->{seeds}*1;
   $whatsup{"out_$name"} = to_number($e->{out_bytes_total});
-
-  $req = HTTP::Request->new('GET', join('/', $w->{tixati_url}, 'transfers', $e->{guid}, 'data'));
-  $res = $ua->request($req);
-  die if($res->code() != 200);
 
   #warn JSON->new->pretty(1)->encode($data);
   #warn JSON->new->pretty(1)->encode($e);
