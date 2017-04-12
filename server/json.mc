@@ -26,7 +26,7 @@
     {
       ($json, $error) = $m->call_next(%$json);
     }
-    if(ref($json) eq 'ARRAY')
+    elsif(ref($json) eq 'ARRAY')
     {
       ($json, $error) = $m->call_next(data => $json);
     }
