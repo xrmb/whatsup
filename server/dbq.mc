@@ -6,7 +6,7 @@
 <%INIT>
   use DBI;
 
-  my $db = $ENV{DOCUMENT_ROOT}.$m->current_comp()->dir_path().'/db.sqlite';
+  my $db = $ENV{DOCUMENT_ROOT}.$m->current_comp()->dir_path().'/data/db.sqlite';
   my $dbh = DBI->connect('dbi:SQLite:dbname='.$db, '', '') || return (undef, { error => __LINE__ });
 
   my $sth = $dbh->prepare($q) || return (undef, { error => __LINE__ });
