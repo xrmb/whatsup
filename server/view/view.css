@@ -1,0 +1,64 @@
+body
+{
+  font-family: "Helvetica Neue",Helvetica,Arial,Geneva,sans-serif;
+}
+
+.hidden
+{
+  display: none;
+}
+
+#topmenu
+{
+  font-size: large;
+  font-weight: bold;
+  overflow: auto;
+}
+
+.pull-right
+{
+  float: right;
+}
+
+
+table.data
+{
+  border-spacing: 1px;
+  border-collapse: separate;
+}
+
+table.data td.host
+{
+  width: 75px;
+  overflow: hidden;
+}
+
+table.data td.time
+{
+  width: 30px;
+  text-align: center;
+}
+
+table.data td.app,
+table.data td.key
+{
+  font-size: 10px;
+  text-align: right;
+}
+
+table.data td.count,
+table.data td.sum
+{
+  font-size: 10px;
+  text-align: right;
+}
+
+table.data .green
+{
+  background-color: green;
+}
+
+table.data .red
+{
+  background-color: red;
+}

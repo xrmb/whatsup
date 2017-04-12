@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Whatsup - View</title>
+  <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+  <script type="text/javascript" src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+  <script type="text/javascript" src="view.js"></script>
+  <link rel="stylesheet" type="text/css" href="view.css">
+</head>
+<body>
+% if($err) {
+  Oups <% $err->{error} |h %>
+% } elsif(!$view) {
+  <div id="login_popup" title="Login">
+  <form name="login" action="?">
+    <input type="password" name="auth" class="" style="width: 100%;" />
+  </form>
+  </div>
+% } else {
+<div id="topmenu">
+  Whatsup - View
+  <button class="logout pull-right">Logout</button>
+</div>
+
+<table class="data">
+<thead>
+<tr>
+  <td class="host">&nbsp;</td>
+%     foreach my $h (0..11) {
+  <td class="time hour"><% $h |h %>h</td>
+%     }
+%     foreach my $d (0..6) {
+  <td class="time day "><% $d |h %>d</td>
+%     }
+</tr>
+</thead>
+%   foreach my $host (sort(keys(%data))) {
+<tr class="host" data-host="<% $host |h %>">
+  <td class="host"><% $host |h %></td>
+%     foreach my $h (0..11) {
+  <td class="time hour <% $data{$host}{h}{$h} ? 'green' : 'red' |h %>"><% scalar(keys($data{$host}{h}{$h})) |h %></td>
+%     }
+%     foreach my $d (0..6) {
+  <td class="time day <% $data{$host}{d}{$d} ? 'green' : 'red' |h %>"><% scalar(keys($data{$host}{d}{$d})) |h %></td>
+%     }
+</tr>
+%     foreach my $app (sort(keys($data{$host}{a}))) {
+<tr class="app hidden" data-host="<% $host |h %>" data-app="<% $app |h %>">
+  <td class="app"><% $app |h %></td>
+%       foreach my $h (0..11) {
+  <td class="count hour"><% $data{$host}{h}{$h}{$app} |h %></td>
+%       }
+%       foreach my $d (0..6) {
+  <td class="count day "><% $data{$host}{d}{$d}{$app} |h %></td>
+%       }
+</tr>
+%       foreach my $key (sort(keys($data{$host}{k}{$app} || {}))) {
+<tr class="key hidden" data-host="<% $host |h %>" data-app="<% $app |h %>" data-key="<% $key |h %>">
+  <td class="key"><% $key |h %></td>
+%         foreach my $h (0..11) {
+  <td class="sum hour"><% $fmt->($data{$host}{hs}{$h}{$app}{$key}{sum}) || '' |h %></td>
+%         }
+%         foreach my $d (0..6) {
+  <td class="sum day "><% $fmt->($data{$host}{ds}{$d}{$app}{$key}{sum}) || '' |h %></td>
+%         }
+</tr>
+%       } # key
+%     } # app
+%   } # host
+</table>
+% } # can view
+</body>
+</html>
+
+
+<%INIT>
+  use DBI;
+  use CGI::Simple::Cookie;
+
+  my %cookies = CGI::Simple::Cookie->fetch();
+
+  my $err;
+  my $admin;
+  my $view;
+
+  my %data;
+
+  ERR: for(;;)
+  {
+    if($cookies{auth})
+    {
+      $admin = $m->comp('../auth.mc', for => 'admin', auth => $cookies{auth}->value());
+      $view = $admin || $m->comp('../auth.mc', for => 'view', auth => $cookies{auth}->value());
+    }
+
+    $view || last ERR;
+
+
+    my $sth;
+    ($sth, $err) = $m->comp('../dbq.mc', q => qq|
+          SELECT  host,
+                  app,
+                  (CAST(strftime('%s', 'now') AS INT) - time)/3600 AS hr,
+                  COUNT(DISTINCT time) AS cnt
+
+            FROM  records
+           WHERE  hr < 12
+        GROUP BY  host, app, hr|);
+
+    $err && last ERR;
+
+    while(my ($host, $app, $h, $cnt) = $sth->fetchrow_array())
+    {
+      $data{$host}{h}{$h}{$app} = $cnt;
+      $data{$host}{a}{$app} = 1;
+    }
+
+
+    ($sth, $err) = $m->comp('../dbq.mc', q => qq|
+          SELECT  host,
+                  app,
+                  CAST(strftime('%J', 'now', 'localtime')-0.5 AS INT) - CAST(strftime('%J', time, 'unixepoch', 'localtime')-0.5 AS INT) AS day,
+                  COUNT(DISTINCT time) AS cnt
+
+            FROM  records
+           WHERE  day < 7
+        GROUP BY  host, app, day|);
+
+    $err && last ERR;
+
+    while(my ($host, $app, $d, $cnt) = $sth->fetchrow_array())
+    {
+      $data{$host}{d}{$d}{$app} = $cnt;
+      $data{$host}{a}{$app} = 1;
+    }
+
+
+    ($sth, $err) = $m->comp('../dbq.mc', q => qq|
+          SELECT  host,
+                  app,
+                  key,
+                  (CAST(strftime('%s', 'now') AS INT) - time)/3600 AS hr,
+                  SUM(value),
+                  AVG(value)
+
+            FROM  records
+           WHERE  hr < 12
+        GROUP BY  host, app, key, hr|);
+
+    while(my ($host, $app, $key, $h, $sum, $avg) = $sth->fetchrow_array())
+    {
+      $data{$host}{hs}{$h}{$app}{$key} = { sum => $sum, avg => $avg };
+      $data{$host}{k}{$app}{$key} = 1;
+    }
+
+
+    ($sth, $err) = $m->comp('../dbq.mc', q => qq|
+          SELECT  host,
+                  app,
+                  key,
+                  CAST(strftime('%J', 'now', 'localtime')-0.5 AS INT) - CAST(strftime('%J', time, 'unixepoch', 'localtime')-0.5 AS INT) AS day,
+                  SUM(value),
+                  AVG(value)
+
+            FROM  records
+           WHERE  day < 7
+        GROUP BY  host, app, key, day|);
+
+    while(my ($host, $app, $key, $h, $sum, $avg) = $sth->fetchrow_array())
+    {
+      $data{$host}{ds}{$h}{$app}{$key} = { sum => $sum, avg => $avg };
+      $data{$host}{k}{$app}{$key} = 1;
+    }
+
+    last ERR;
+  }
+
+
+  my $fmt = sub
+  {
+    my ($num) = @_;
+    my $u = '';
+    my @u = qw(k m g t);
+    my $f = '%.0f';
+    while($num > 1000)
+    {
+      $num /= 1000;
+      $u = shift(@u);
+      $f = $num > 100 ? '%.0f' : '%.1f';
+    }
+
+    return sprintf($f, $num).$u;
+  };
+</%INIT>
