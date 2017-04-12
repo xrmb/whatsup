@@ -1,4 +1,5 @@
 client/config.dat
 server/auth.dat
 *.sqlite
+*.zip
 client/queue/*
