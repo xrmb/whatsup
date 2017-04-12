@@ -11,7 +11,8 @@
     #$json = JSON->new->allow_singlequote->allow_barekey->decode($json) || {};
   };
 
-  if(ref($json) ne 'HASH')
+  my $error;
+  if(ref($json) ne 'HASH' && ref($json) ne 'ARRAY')
   {
     $json = { error => 'json error '.$@ };
   }
@@ -21,13 +22,27 @@
     my %args = @$args;
     delete($args{json});
     @$args = %args;
-    $json = $m->call_next(%$json);
+    if(ref($json) eq 'HASH')
+    {
+      ($json, $error) = $m->call_next(%$json);
+    }
+    if(ref($json) eq 'ARRAY')
+    {
+      ($json, $error) = $m->call_next(data => $json);
+    }
   }
 
   $r->content_type('application/json');
   $m->out(encode_json($json));
-  if($json->{error})
+
+  if($error)
   {
-    $r->header_out(status => $json->{code} || 500);
+    $r->headers_out->{Status} = $error;
+    $m->abort($r->headers_out->{Status});
+  }
+  elsif(ref($json) eq 'HASH' && $json->{error})
+  {
+    $r->headers_out->{Status} = $json->{code} || 500;
+    $m->abort($r->headers_out->{Status});
   }
 </%INIT>
