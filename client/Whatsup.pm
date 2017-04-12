@@ -4,7 +4,7 @@ use strict;
 
 use Sys::Hostname;
 use LWP;
-use JSON;
+use JSON::PP;
 use File::Temp;
 
 
@@ -55,7 +55,7 @@ sub record
   }
   $args{time} ||= time();
 
-  my $json = to_json(\%args);
+  my $json = encode_json(\%args);
 
   my $uri = $self->{service}.'add/';
   my $req = HTTP::Request->new('POST', $uri);
@@ -73,7 +73,7 @@ sub record
     if(!$self->{noqueue})
     {
       delete($args{auth});
-      my $json = to_json(\%args);
+      my $json = encode_json(\%args);
 
       my $dir = __FILE__.'/../queue';
       unless(-d $dir) { mkdir($dir) || warn('cant make queue dir') && return __LINE__; }
