@@ -3,7 +3,8 @@ package Whatsup;
 use strict;
 
 use Sys::Hostname;
-use LWP;
+#use LWP;
+use HTTP::Tiny;
 use JSON::PP;
 use File::Temp;
 
@@ -58,18 +59,21 @@ sub record
   my $json = encode_json(\%args);
 
   my $uri = $self->{service}.'add/';
-  my $req = HTTP::Request->new('POST', $uri);
-  $req->header('Content-Type' => 'application/json');
-  $req->content($json);
 
-  my $lwp = LWP::UserAgent->new();
-  my $res = $lwp->request($req);
+  my $ua = new HTTP::Tiny();
+  my $res = $ua->post($uri, { headers => {'Content-Type' => 'application/json'}, content => $json});
+  #my $req = HTTP::Request->new('POST', $uri);
+  #$req->header('Content-Type' => 'application/json');
+  #$req->content($json);
 
-  my $content = $res->content();
+  #my $lwp = LWP::UserAgent->new();
+  #my $res = $lwp->request($req);
 
-  if($res->code() != 200)
+  my $content = $res->{content};
+
+  if($res->{status} != 200)
   {
-    warn(sprintf("service: %d %s %s\n", $res->code(), $uri, $content));
+    warn(sprintf("service: %d %s %s\n", $res->{status}, $uri, $content));
     if(!$self->{noqueue})
     {
       delete($args{auth});
