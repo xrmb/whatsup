@@ -20,7 +20,7 @@ my %whatsup;
 
 ### uptime ###
 my $gtc = Win32::API->new('kernel32', 'GetTickCount64', '', 'Q') || die;
-$gtc->UseMI64(1);
+#$gtc->UseMI64(1);
 $whatsup{uptime} = int(substr($gtc->Call(), 0, -3));
 
 
