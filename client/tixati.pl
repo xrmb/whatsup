@@ -19,13 +19,13 @@ my $w = new Whatsup(app => 'tixati');
 
 
 my ($proto, $user, $pass, $host, $port) = ($w->{tixati_url} =~ m!^(\w*)://(\w+):(\w+)@(.*?):(\d+)!);
-my $req = HTTP::Request->new('GET', $w->{tixati_url}.'/torrents_data');
+my $req = HTTP::Request->new('GET', $w->{tixati_url}.'/home');
 
 my $ua = LWP::UserAgent->new();
 $ua->credentials("$host:$port", 'Tixati Web Interface', $user, $pass);
 my $res = $ua->request($req);
 
-die if($res->code() != 200);
+die $res->code() if($res->code() != 200);
 
 my $data = JSON->new->utf8->decode($res->content());
 my %whatsup;

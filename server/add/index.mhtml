@@ -9,29 +9,39 @@
   $time => undef
 </%ARGS>
 <%INIT>
+  use Whatsup;
+
   $m->comp('../auth.mc', for => "add.$host", auth => $auth) || return { code => 403, error => __LINE__ };
 
-  my $q = qq|INSERT INTO `records` (`host`, `app`, `time`, `received`, `key`, `value`) VALUES (?, ?, ?, ?, ?, ?)|;
-  my ($sth, $err) = $m->comp('../dbq.mc', q => $q, exec => 0);
-  if($err) { $err = { err => 0, msg => 'prepare error' }; }
-
-  my $any = 0;
-  foreach my $key (sort(keys(%ARGS)))
+  if(1)
   {
-    next if($key =~ /^(app|host|time|auth)$/);
-    if(!$sth->execute($host, $app, $time || time(), time(), $key, int($ARGS{$key})))
+    my ($err) = Whatsup->record(%ARGS, host => $host, app => $app, time => $time);
+    if($err) { return { error => $err }; }
+  }
+  else
+  {
+    my $q = qq|INSERT INTO `records` (`host`, `app`, `time`, `received`, `key`, `value`) VALUES (?, ?, ?, ?, ?, ?)|;
+    my ($sth, $err) = $m->comp('../dbq.mc', q => $q, exec => 0);
+    if($err) { $err = { err => 0, msg => 'prepare error' }; }
+
+    my $any = 0;
+    foreach my $key (sort(keys(%ARGS)))
     {
-      warn($sth->errstr());
+      next if($key =~ /^(app|host|time|auth)$/);
+      if(!$sth->execute($host, $app, $time || time(), time(), $key, int($ARGS{$key})))
+      {
+        warn($sth->errstr());
+      }
+
+      $any++;
     }
 
-    $any++;
-  }
-
-  if(!$any)
-  {
-    if(!$sth->execute($host, $app, $time || time(), time(), undef, undef))
+    if(!$any)
     {
-      warn($sth->errstr());
+      if(!$sth->execute($host, $app, $time || time(), time(), undef, undef))
+      {
+        warn($sth->errstr());
+      }
     }
   }
 
