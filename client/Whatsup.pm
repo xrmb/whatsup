@@ -8,6 +8,7 @@ use HTTP::Tiny;
 use JSON::PP;
 use File::Temp;
 use DBI;
+use Cwd;
 
 
 
@@ -20,15 +21,15 @@ sub new
   if($inst) { return $inst; }
 
   my $cfg = {};
-  my $fh;
-  if(open($fh, '<', __FILE__.'/../config.dat'))
+  my $cfgfn = Cwd::abs_path(__FILE__.'/../config.dat');
+  if(open(my $fh, '<', $cfgfn))
   {
     $cfg = { split(/[\t\n\r]+/, join('', grep { /^[^;#]/ } <$fh>)) };
     close($fh);
   }
   else
   {
-    warn('cant open config.dat');
+    warn("cant open $cfgfn ($!)");
   }
 
   my $self = $cfg;
