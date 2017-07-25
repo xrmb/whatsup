@@ -14,5 +14,8 @@ host	this_computer_name
 # required, auth key to add service
 auth	some_secret_message
 #
-# use buy "tixati", url to "info page"
+# used by "tixati", url to "info page"
 tixati_url	http://user:pass@localhost:19300/help
+#
+# use by the dht22 temp/humidity reader
+dht22_pin 71
