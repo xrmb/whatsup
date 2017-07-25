@@ -136,8 +136,8 @@ sub record
       delete($args{auth});
       my $json = encode_json(\%args);
 
-      my $dir = __FILE__.'/../queue';
-      unless(-d $dir) { mkdir($dir) || warn('cant make queue dir') && return __LINE__; }
+      my $dir = Cwd::abs_path(__FILE__.'/../queue');
+      unless(-d $dir) { mkdir($dir) || warn("cant make queue dir $dir") && return __LINE__; }
       my $fh = File::Temp->new(DIR => $dir, TEMPLATE => $args{app}.'_XXXXXX', SUFFIX => '.json', UNLINK => 0);
       print($fh $json);
     }
