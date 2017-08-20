@@ -8,10 +8,11 @@ use Whatsup;
 use strict;
 
 
+my $err = 0;
 my $pin = Whatsup->new->{'dht22_pin'};
 for(;;)
 {
-  my $dht22 = `dht22 -p $pin 2>&1`;
+  my $dht22 = `/usr/local/bin/dht22 -p $pin 2>&1`;
   if($dht22 =~ /Humidity: ([\d\.]+).*Temperature: ([\d\.]+)/s)
   {
     #print("h: $1, t: $2\n");
@@ -19,5 +20,10 @@ for(;;)
     last;
   }
   sleep(1);
+  $err++;
+  print(STDERR "error: $dht22\n");
+  last if($err > 5);
   next;
 }
+
+exit 0;
