@@ -1,4 +1,4 @@
-#!perl
+#!/usr/bin/env perl
 
 use JSON;
 use Cwd;
@@ -17,8 +17,8 @@ $| = 1;
 
 
 my $dh;
-opendir($dh, __FILE__.'/../queue') || die;
-my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { __FILE__."/../queue/$_" } grep { /\.json$/ } readdir($dh);
+opendir($dh, Cwd::abs_path(__FILE__.'/../queue')) || die;
+my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { Cwd::abs_path(__FILE__."/../queue/$_") } grep { /\.json$/ } readdir($dh);
 closedir($dh);
 
 
