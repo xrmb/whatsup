@@ -3,7 +3,7 @@
 use JSON;
 use Cwd;
 
-use lib (__FILE__.'/..');
+use lib (Cwd::abs_path(__FILE__.'/..'));
 use Whatsup;
 
 use strict;
