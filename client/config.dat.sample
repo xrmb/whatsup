@@ -17,5 +17,9 @@ auth	some_secret_message
 # used by "tixati", url to "info page"
 tixati_url	http://user:pass@localhost:19300/help
 #
-# use by the dht22 temp/humidity reader
-dht22_pin 71
+# used by the dht22 temp/humidity reader
+dht22_bin       /usr/local/bin/loldht
+# or
+#dht22_bin	/usr/local/bin/dht22
+dht22_pin       7
+dht22_name      outdoors
