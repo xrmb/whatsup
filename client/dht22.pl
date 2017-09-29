@@ -16,42 +16,34 @@ my $name = Whatsup->new->{'dht22_name'} || die 'need dht22_name';
 for(;;)
 {
   my $out;
-  if($bin =~ /lol/)
+
+  if($bin =~ /lol/) { $out = `$bin $pin 2>&1`; }
+  elsif($bin =~ /dht22/) { $out = `$bin -p $pin 2>&1`; }
+  else { die 'dht22_bin not supported'; }
+
+  if($out =~ /Humidity = (?<h>[\d\.]+).*Temperature = (?<t>[\d\.]+)/s ||
+     $out =~ /Humidity: (?<h>[\d\.]+).*Temperature: (?<t>[\d\.]+)/s)
   {
-    $out = `$bin $pin 2>&1`;
-    if($out =~ /Humidity = (?<h>[\d\.]+).*Temperature = (?<t>[\d\.]+)/s)
+    my $t = $+{t}*1;
+    my $h = $+{h}*1;
+    if($h < 0 || $h > 100 || $t < -40 || $t > 80)
+    {
+      $out = sprintf("value out of range: $name.humidity: %.1f%%, $name.temperature: %.1fC\n", $t, $h);
+    }
+    else
     {
       if($test)
       {
-        print("$name.humidity: $+{h}, $name.temperature: $+{t}\n");
+        printf("$name.humidity: %.1f%%, $name.temperature: %.1fC\n", $h, $t);
       }
       else
       {
-        Whatsup->record(app => 'dht22', "$name.temperature" => int($+{t}*10), "$name.humidity" => int($+{h}*10));
+        Whatsup->record(app => 'dht22', "$name.temperature" => int($t*10), "$name.humidity" => int($h*10));
       }
       last;
     }
   }
-  elsif($bin =~ /dht22/)
-  {
-    $out = `$bin -p $pin 2>&1`;
-    if($out =~ /Humidity: (?<h>[\d\.]+).*Temperature: (?<t>[\d\.]+)/s)
-    {
-      if($test)
-      {
-        print("$name.humidity: $+{h}, $name.temperature: $+{t}\n");
-      }
-      else
-      {
-        Whatsup->record(app => 'dht22', "$name.temperature" => int($+{t}*10), "$name.humidity" => int($+{h}*10));
-      }
-      last;
-    }
-  }
-  else
-  {
-    die 'dht22_bin not supported';
-  }
+
   sleep(1);
   $err++;
   print(STDERR "error: $out\n");
