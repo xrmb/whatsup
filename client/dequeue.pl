@@ -29,8 +29,15 @@ foreach my $r (@r)
 
   my $fh;
   open($fh, '<', $r) || die;
-  my $json = JSON->new->decode(join('', <$fh>));
+  my $json;
+  eval { $json = JSON->new->decode(join('', <$fh>)); };
   close($fh);
+
+  if(!$json || $@)
+  {
+    warn($@);
+    next;
+  }
 
   if($whatsup->record(%$json) == 0)
   {
