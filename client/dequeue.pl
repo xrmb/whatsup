@@ -1,9 +1,9 @@
-#!perl
+#!/usr/bin/env perl
 
 use JSON;
 use Cwd;
 
-use lib (__FILE__.'/..');
+use lib (Cwd::abs_path(__FILE__.'/..'));
 use Whatsup;
 
 use strict;
@@ -17,8 +17,8 @@ $| = 1;
 
 
 my $dh;
-opendir($dh, __FILE__.'/../queue') || die;
-my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { __FILE__."/../queue/$_" } grep { /\.json$/ } readdir($dh);
+opendir($dh, Cwd::abs_path(__FILE__.'/../queue')) || die;
+my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { Cwd::abs_path(__FILE__."/../queue/$_") } grep { /\.json$/ } readdir($dh);
 closedir($dh);
 
 
@@ -29,8 +29,15 @@ foreach my $r (@r)
 
   my $fh;
   open($fh, '<', $r) || die;
-  my $json = JSON->new->decode(join('', <$fh>));
+  my $json;
+  eval { $json = JSON->new->decode(join('', <$fh>)); };
   close($fh);
+
+  if(!$json || $@)
+  {
+    warn($@);
+    next;
+  }
 
   if($whatsup->record(%$json) == 0)
   {
