@@ -19,3 +19,6 @@ tixati_url	http://user:pass@localhost:19300/help
 #
 # use by the dht22 temp/humidity reader
 dht22_pin 71
+#
+# wemo insight read out, use id for different wemos
+wemo#id ip
