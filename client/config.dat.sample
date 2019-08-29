@@ -26,3 +26,6 @@ dht22_name	outdoors
 # if you have more than on sensor at the same pi
 dht22_pin       7,0
 dht22_name      outdoors,indoors
+#
+# wemo insight read out, use id for different wemos
+wemo#id ip
