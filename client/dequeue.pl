@@ -15,9 +15,14 @@ if($ARGV[0] eq 'delete') { exit system(qq|schtasks /delete /tn "$ARGV[1]\\whatsu
 
 $| = 1;
 
+my $qd = Cwd::abs_path(__FILE__.'/../queue');
+unless(-d $qd)
+{
+  mkdir($qd) || die "can't create queue dir '$qd'"
+}
 
 my $dh;
-opendir($dh, Cwd::abs_path(__FILE__.'/../queue')) || die;
+opendir($dh, $qd) || die "can't open queue dir '$qd'";
 my @r = sort { (stat($a))[9] <=> (stat($b))[9] } map { Cwd::abs_path(__FILE__."/../queue/$_") } grep { /\.json$/ } readdir($dh);
 closedir($dh);
 
