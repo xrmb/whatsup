@@ -56,10 +56,8 @@ SENSOR: for(;;)
         {
           printf("$name.humidity: %.1f%%, $name.temperature: %.1fC\n", $h, $t);
         }
-        else
-        {
-          %whatsup = (%whatsup, app => 'dht22', "$name.temperature" => int($t*10), "$name.humidity" => int($h*10));
-        }
+
+        %whatsup = (%whatsup, app => 'dht22', "$name.temperature" => int($t*10), "$name.humidity" => int($h*10));
         last;
       }
     }
@@ -74,7 +72,18 @@ SENSOR: for(;;)
 
 if(%whatsup)
 {
-  Whatsup->record(%whatsup);
+  if($test)
+  {
+    print("sending:\n");
+    foreach my $key (keys(%whatsup))
+    {
+      printf("  %s\t%s\n", $key, $whatsup{$key});
+    }
+  }
+  else
+  {
+    Whatsup->record(%whatsup);
+  }
 }
 
 exit 0;

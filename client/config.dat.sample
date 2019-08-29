@@ -23,3 +23,6 @@ dht22_bin	/usr/local/bin/loldht
 #dht22_bin	/usr/local/bin/dht22
 dht22_pin	7
 dht22_name	outdoors
+# if you have more than on sensor at the same pi
+dht22_pin       7,0
+dht22_name      outdoors,indoors
