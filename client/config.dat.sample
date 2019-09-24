@@ -14,8 +14,10 @@ host	this_computer_name
 # required, auth key to add service
 auth	some_secret_message
 #
+#
 # used by "tixati", url to "info page"
 tixati_url	http://user:pass@localhost:19300/help
+#
 #
 # used by the dht22 temp/humidity reader
 dht22_bin	/usr/local/bin/loldht
@@ -27,5 +29,10 @@ dht22_name	outdoors
 dht22_pin       7,0
 dht22_name      outdoors,indoors
 #
+#
 # wemo insight read out, use id for different wemos
 wemo#id ip
+#
+#
+# read miflora data, mac = C4:7C:8D:XX:YY:ZZ or XX:YY:ZZ or XXYYZZ
+miflora#id mac
