@@ -36,6 +36,7 @@ sub new
 
   $self->{host} = $args{host} || $cfg->{host} || hostname() || warn('no host');
   $self->{app} = $args{app};
+  $self->{authhost} = $cfg->{authhost} || $cfg->{host};
   $self->{auth} = $cfg->{auth} || warn('no auth');
   $self->{service} = $cfg->{service} || warn('no service');
   $self->{db} = $cfg->{db};
@@ -93,7 +94,7 @@ sub record
   my ($self, %args) = @_;
   if(!ref($self)) { $self = __PACKAGE__->new(%args); }
 
-  foreach my $k (qw(host app auth))
+  foreach my $k (qw(host app auth authhost))
   {
     $args{$k} ||= $self->{$k};
     $args{$k} || warn("no $k") && return __LINE__;
